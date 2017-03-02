@@ -1,0 +1,38 @@
+{
+  "name": "vscode-css-languageservice",
+  "version": "2.0.0",
+  "description": "Language service for CSS, LESS and SCSS",
+  "main": "./lib/cssLanguageService.js",
+  "typings": "./lib/cssLanguageService",
+  "author": "Microsoft Corporation",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vscode-css-languageservice"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Microsoft/vscode-css-languageservice"
+  },
+  "devDependencies": {
+    "mocha": "^2.4.5",
+    "typescript": "^2.1.5",
+    "xml2js": "^0.4.16",
+    "mkdirp": "^0.5.1",
+    "cpy-cli": "^1.0.1",
+    "@types/node": "^6.0.46",
+    "@types/mocha": "^2.2.32"
+  },
+  "dependencies": {
+    "vscode-languageserver-types": "^3.0.3",
+    "vscode-nls": "^2.0.1"
+  },
+  "scripts": {
+    "prepublish": "npm run compile",
+    "copy-data": "cpy ./src/data/* ./lib/data",
+    "compile": "tsc -p ./src && mkdirp ./lib/data && npm run copy-data",
+    "watch": "npm run copy-data && tsc -w -p ./src",
+    "test": "npm run compile && mocha",
+    "update-data": "node ./build/generate_browserjs.js",
+    "install-types-next": "npm install vscode-languageserver-types@next -f -S"
+  }
+}

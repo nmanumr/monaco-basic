@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="../node_modules/monaco-editor-core/dev/vs/editor/editor.main.css">
+</head>
+
+<body>
+
+    <h2>Monaco Editor CSS test page</h2>
+    <div id="container" style="width:800px;height:600px;border:1px solid grey"></div>
+
+    <script>
+        // Loading basic-languages to get the css language definition
+        var require = {
+            paths: {
+                'vs/basic-languages': '../node_modules/monaco-languages/release',
+                'vs/language/css': '../release/dev',
+                'vs': '../node_modules/monaco-editor-core/dev/vs'
+            }
+        };
+    </script>
+    <script src="../node_modules/monaco-editor-core/dev/vs/loader.js"></script>
+    <script src="../node_modules/monaco-editor-core/dev/vs/editor/editor.main.nls.js"></script>
+    <script src="../node_modules/monaco-editor-core/dev/vs/editor/editor.main.js"></script>
+
+    <script>
+        require([
+            'vs/basic-languages/src/monaco.contribution',
+            'vs/language/css/monaco.contribution'
+        ], function() {
+            var editor = monaco.editor.create(document.getElementById('container'), {
+                value: [
+                    '10 print 10',
+                    "20 for a = 1 to 10",
+                    "30 print a",
+                    "40 next a",
+                    "50 end"
+                ].join('\n'),
+                language: 'css'
+            });
+        });
+    </script>
+
+</body>
+
+</html>
