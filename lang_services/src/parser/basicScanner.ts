@@ -1,5 +1,3 @@
-'use strict';
-
 export enum TokenType {
 	Ident = 0,
 	String = 1,
@@ -134,9 +132,12 @@ export class MultiLineStream {
 		for (i = 0; i < ch.length; i++) {
 			var nextChar = this._toLower(this.source.charCodeAt(this.position + i));
 			var char = this._toLower(ch[i]);
-			if (this.source.charCodeAt(this.position + i) !== ch[i]) {
+			if (nextChar !== char) {
 				return false;
 			}
+		}
+		if(ch == [_M, _O, _D]){
+			console.log(i);
 		}
 		this.advance(i);
 		return true;
@@ -248,6 +249,7 @@ staticTokenTable[_BRL] = TokenType.BracketL;
 staticTokenTable[_LPA] = TokenType.ParenthesisL;
 staticTokenTable[_RPA] = TokenType.ParenthesisR;
 staticTokenTable[_CMA] = TokenType.Comma;
+
 staticTokenTable[_QTN] = TokenType.ShortPrint;
 staticTokenTable[_GRT] = TokenType.Operator;
 staticTokenTable[_LES] = TokenType.Operator;
@@ -262,7 +264,7 @@ staticTokenTable[_HAT] = TokenType.Operator;
 export class Scanner {
 
 	public stream: MultiLineStream;
-	public ignoreComment = true;
+	public ignoreComment = false;
 	public ignoreWhitespace = true;
 	public lineStarted = true;
 
@@ -321,20 +323,11 @@ export class Scanner {
 		// check for line numbers
 		if (this.lineStarted) {
 			let pos = this.stream.pos();
-			if (this._decimal()) {
+			if (this._Num()) {
 				content = [this.stream.substring(offset, pos)];
 				return this.finishToken(offset, TokenType.LineNum, content.join(''));
-
 			}
 			this.lineStarted = false;
-		}
-
-		// Comments
-		content = [];
-		if (this._isCommentChar()) {
-			
-			let pos = this.stream.pos();
-			content = [this.stream.substring(offset, pos)];
 		}
 
 		// String, BadString
@@ -433,11 +426,11 @@ export class Scanner {
 			} else if (this._isNewline()) {
 				return this.finishToken(offset, TokenType.Newline);
 
-			} //else if (this.comment()) {
-			// 	if (!this.ignoreComment) {
-			// 		return this.finishToken(offset, TokenType.Comment);
-			// 	}
-			// } 
+			}else if (this.comment()) {
+				if (!this.ignoreComment) {
+					return this.finishToken(offset, TokenType.Comment);
+				}
+			} 
 			else {
 				return null;
 			}
@@ -445,32 +438,16 @@ export class Scanner {
 	}
 
 	protected comment(): boolean {
-		if (this.stream.advanceIfChars([_R, _E, _L]) ||
-			this.stream.advanceIfChars([_r, _e, _l]) ||
+		if (this.stream.advanceIfChars([_R, _E, _M]) ||
 			this.stream.advanceIfChar(_SQO)) {
 
-			this.stream.advanceWhileChar((ch) => {
-				if (!(this._isNewline() || this.stream.eos())) {
-					return true;
-				}
+			var n =this.stream.advanceWhileChar((ch) => {
+				return ch !== _NWL || ch !== _LFD || ch !== _CAR;
 			});
-			this.stream.goBack(1);
+			console.log(this.stream.pos());
+			this.stream.advance(n);
 			return true;
 		}
-		return false;
-	}
-
-	private _isCommentChar(): boolean{
-		if(this.stream.peekChar() == _SQO){
-			return true;
-		} else if(this.stream.peekChar() == _r || this.stream.peekChar() == _R){
-			if( this.stream.peekChar(1) == _e || this.stream.peekChar() == _E){
-				if (this.stream.peekChar(2) == _m || this.stream.peekChar() ==_M){
-					return true;
-				}
-			}
-		}
-		
 		return false;
 	}
 
@@ -494,8 +471,20 @@ export class Scanner {
 			this.stream.advanceIfChars([_E, _Q, _V]) ||
 			this.stream.advanceIfChars([_I, _M, _P])){
 				// Triple Char Operator
-				this.stream.advance(3);
 				return true;
+		}
+		return false;
+	}
+
+	private _Num(): boolean{
+		let npeek = 0, ch: number;
+		ch = this.stream.peekChar(npeek);
+		if (ch >= _0 && ch <= _9) {
+			this.stream.advance(npeek + 1);
+			this.stream.advanceWhileChar((ch) => {
+				return ch >= _0 && ch <= _9;
+			});
+			return true;
 		}
 		return false;
 	}
@@ -506,10 +495,17 @@ export class Scanner {
 			npeek = 1;
 		}
 		ch = this.stream.peekChar(npeek);
-		if (ch >= _0 && ch <= _9) {
+		if (ch >= _0 && ch <= _9 ||
+					npeek === 0 && ch === _DOT ||
+					ch == _d || ch == _D ||
+					ch == _PLS || ch == _MIN) {
 			this.stream.advance(npeek + 1);
 			this.stream.advanceWhileChar((ch) => {
-				return ch >= _0 && ch <= _9 || npeek === 0 && ch === _DOT;
+				return ch >= _0 && ch <= _9 ||
+					npeek === 0 && ch === _DOT ||
+					ch == _d || ch == _D ||
+					ch == _e || ch == _E ||
+					ch == _PLS || ch == _MIN;
 			});
 			return true;
 		}
