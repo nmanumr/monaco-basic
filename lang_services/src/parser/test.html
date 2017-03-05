@@ -1,0 +1,14 @@
+<textarea id="text" style="width: 100%; height: 500px;"></textarea>
+<button onclick="Tokenize()">Tokenize</button>
+<script src="./basicScanner.js"></script>
+
+<script>
+    var scannerFile = require('./basicScanner.js');
+    var scanner = new scannerFile.Scanner();
+
+    function Tokenize() {
+        var text = document.getElementById('text').value;
+        scanner.setSource(text);
+        console.log(scanner.tokenize());
+    }
+</script>
